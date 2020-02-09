@@ -9,7 +9,7 @@ const initialForm = {
 const initialState = {
     form: initialForm,
 
-
+    selectedUsuario: ''
 }
 
 const Firebase = (state = initialState, action) => {
@@ -36,8 +36,13 @@ const Firebase = (state = initialState, action) => {
 
         case 'RESET_FORM':
             return state = {
+                ...initialState
+            }
+
+        case 'SET_SELECTED_USUARIO':
+            return state = {
                 ...state,
-                form: initialForm
+                selectedUsuario: action.payload
             }
 
         default:

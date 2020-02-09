@@ -1,5 +1,7 @@
 import React from 'react'
 import FormImagen from './FormImagen';
+import ListImagenes from './ListImagenes';
+import ToolBar from './ToolBar';
 const inProgress = false;
 
 const Firebase = () => {
@@ -13,6 +15,10 @@ const Firebase = () => {
                 <h1 className="display-4">Ejemplo de Firebase</h1>
             </div>
             <FormImagen />
+            <hr />
+            <ToolBar />
+            <hr />
+            <ListImagenes />
 
         </div>
     )

@@ -4,6 +4,7 @@ import { CHANGE_USUARIO, CHANGE_IMAGEN, RESET_FORM } from "../../reducers/Fireba
 import uuid from "uuid";
 import { SHOW_MODAL } from "../../reducers/DOM/actions";
 import useAxios from "axios-hooks";
+import { URL_API } from '../../CONS/urls';
 
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -24,34 +25,30 @@ const FormImagen = () => {
 
     const { form } = Firebase
 
-    const [{ data, loading, error }, subirImagen] = useAxios({
-        url: 'https://rnkpgpxpa1.execute-api.us-east-1.amazonaws.com/prueba/subir-imagen',
+    const [imagenRequest, subirImagen] = useAxios({
+        url: `${URL_API}subir-imagen`,
         method: 'POST'
     },
         { manual: true }
     )
 
     const [firebaseRequest, subirFirebase] = useAxios({
-        url: '',
+        url: `${URL_API}push-url`,
         method: 'POST'
     }, { manual: true })
     /**
      *  CICLO DE VIDA
      */
     useEffect(() => {
-        if (data && !error) {
-            subirFirebase({
-                data: {
-                    usuario: form.usuario,
-                    action: 'pushImagen',
-                    actionParams: data.url
-                }
-            })
+        if (imagenRequest.data && !imagenRequest.error && !firebaseRequest.data) {
+            subirFirebase({ data: imagenRequest.data })
         }
         if (firebaseRequest.data) {
+            delete firebaseRequest.data;
+            delete imagenRequest.data;
             dispatch(RESET_FORM())
         }
-    }, [data, error, dispatch, form.usuario, subirFirebase, firebaseRequest.data])
+    }, [imagenRequest.error, dispatch, form.usuario, subirFirebase, firebaseRequest.data, imagenRequest.data])
 
 
 
@@ -105,7 +102,7 @@ const FormImagen = () => {
         }
     }
 
-    if (loading) {
+    if (imagenRequest.loading) {
         return (
             <div className="col-12 my-5 py-5">
                 <h1>SUBIENDO IMAGEN A S3</h1>
@@ -139,11 +136,11 @@ const FormImagen = () => {
                     <div className="form-group">
                         <label>Imagen:</label>
                         <div className="custom-file">
-                            <label className="custom-file-label">{form.imagen.value}</label>
+                            <label className="custom-file-label text-truncate">{form.imagen.value}</label>
                             <input className="custom-file-input"
                                 type="file"
                                 name="imagen"
-                                onChange={handleOnImagenChange}
+                                onChange={handleOnImagenChange}                 
                             />
                         </div>
                     </div>
