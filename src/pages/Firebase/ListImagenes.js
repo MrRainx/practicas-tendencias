@@ -1,31 +1,19 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import Table from 'react-bootstrap/Table'
 import useAxios from "axios-hooks";
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { SHOW_MODAL } from '../../reducers/DOM/actions';
+import { URL_FIREBASE_LAMBDA } from '../../CONS/urls';
+
 const ListImagenes = () => {
-
-    const [imagenes, setImagenes] = useState([])
-
-    const { selectedUsuario } = useSelector(state => state.Firebase)
 
     const dispatch = useDispatch()
 
-    const [imagenesRequest, getImagenes] = useAxios({
-        url: `http://127.0.0.1:8000/get-imagenes/${selectedUsuario}`,
-        method: 'GET'
-    }, { manual: true })
-
-
-    useEffect(() => {
-        if (selectedUsuario !== '') {
-            getImagenes()
-        }
-    }, [selectedUsuario, getImagenes])
-
-    useEffect(() => {
-        if (imagenesRequest.data) setImagenes(imagenesRequest.data['imagenes']);
-    }, [imagenesRequest.data])
+    const [{ data, loading }, refresh] = useAxios({
+        url: URL_FIREBASE_LAMBDA,
+        method: 'POST',
+        data: { opcion: '1' }
+    })
 
     function handleOnClickTableRow(url) {
         dispatch(SHOW_MODAL({
@@ -37,28 +25,34 @@ const ListImagenes = () => {
         }));
     }
 
-    if (imagenesRequest.loading) {
-        return `CARGANDO IMAGENES DE ${selectedUsuario}`
+    if (loading) {
+        return (<div>
+            <h1>CARGANDO IMAGNES DESDE FIREBASE</h1>
+            <p>ESPERE POR FAVOR</p>
+        </div>)
     }
+
+    const tBodyComponent = Object.values(data.data).map((value, index) => (
+        <tr key={index}>
+            <td>{index + 1}</td>
+            <td onClick={e => handleOnClickTableRow(value.url)}>{value.url}</td>
+            <td>{value.usuario}</td>
+        </tr>
+    ))
 
     return (
         <div className="mt-2">
+            <button className="btn btn-info btn-sm btn-block" onClick={refresh}>REFRESCAR</button>
             <Table size="sm" bordered hover responsive="sm" striped color="info" variant="dark">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>URL Imagen</th>
+                        <th>Usuario</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {
-                        imagenes.map((value, index) => (
-                            <tr key={index}>
-                                <td>{index + 1}</td>
-                                <td onClick={e => handleOnClickTableRow(value)}>{value}</td>
-                            </tr>
-                        ))
-                    }
+                    {tBodyComponent}
                 </tbody>
             </Table>
         </div>

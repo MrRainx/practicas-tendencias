@@ -1,7 +1,9 @@
 import React from 'react'
-import { useHistory } from 'react-router-dom'
+//import { useHistory } from 'react-router-dom'
 
 const Home = () => {
+
+    /*
     const history = useHistory()
 
 
@@ -10,12 +12,17 @@ const Home = () => {
 
         history.push(`/${name}`)
     }
+    */
 
 
     return (
         <div>
-            <button name="imagens3" onClick={handleOnClick}>Imagenes en S3</button>
-            <button name="firebase" onClick={handleOnClick}>Firebase</button>
+            {
+                /*
+                <button name="imagens3" onClick={handleOnClick}>Imagenes en S3</button>
+                <button name="firebase" onClick={handleOnClick}>Firebase</button>
+                */
+            }
         </div>
     )
 }

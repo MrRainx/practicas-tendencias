@@ -4,6 +4,7 @@ import NavItem from './NavItem'
 
 const links = [
     { path: '/imagens3', title: 'ImagenS3' },
+    { path: '/', title: 'Inicio' },
     { path: '/firebase', title: 'Firebase' },
 ]
 

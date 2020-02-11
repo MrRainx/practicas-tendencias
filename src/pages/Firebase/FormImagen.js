@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { CHANGE_USUARIO, CHANGE_IMAGEN, RESET_FORM } from "../../reducers/Firebase/actions";
 import uuid from "uuid";
 import { SHOW_MODAL } from "../../reducers/DOM/actions";
 import useAxios from "axios-hooks";
-import { URL_API } from '../../CONS/urls';
+import { URL_API, URL_FIREBASE_LAMBDA } from '../../CONS/urls';
 
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -32,25 +32,10 @@ const FormImagen = () => {
         { manual: true }
     )
 
-    const [firebaseRequest, subirFirebase] = useAxios({
-        url: `${URL_API}push-url`,
+    const [firebaseRequest, publicarEnFibrebase] = useAxios({
+        url: URL_FIREBASE_LAMBDA,
         method: 'POST'
     }, { manual: true })
-    /**
-     *  CICLO DE VIDA
-     */
-    useEffect(() => {
-        if (imagenRequest.data && !imagenRequest.error && !firebaseRequest.data) {
-            subirFirebase({ data: imagenRequest.data })
-        }
-        if (firebaseRequest.data) {
-            delete firebaseRequest.data;
-            delete imagenRequest.data;
-            dispatch(RESET_FORM())
-        }
-    }, [imagenRequest.error, dispatch, form.usuario, subirFirebase, firebaseRequest.data, imagenRequest.data])
-
-
 
     /**
      * HANDLERS
@@ -63,23 +48,25 @@ const FormImagen = () => {
 
     function handleOnImagenChange(event) {
         const { files } = event.target
+
         const { name, type } = files[0]
+
         toBase64(files[0])
             .then(archivo => {
                 const tipo = type.split('/')[1];
                 const ind = archivo.indexOf(',');
                 const b64 = archivo.substring(ind + 1);
-                const payload = {
+
+                dispatch(CHANGE_IMAGEN({
                     value: name,
                     b64,
                     nombre: `${uuid.v4()}.${tipo}`
-                }
-                dispatch(CHANGE_IMAGEN(payload))
+                }))
             })
         //dispatch(CHANGE_IMAGEN())
     }
 
-    function handleOnSubmit(event) {
+    async function handleOnSubmit(event) {
         event.preventDefault()
         if (''.includes(form.usuario) || ''.includes(form.imagen.value)) {
 
@@ -91,13 +78,24 @@ const FormImagen = () => {
 
         } else {
 
-            subirImagen({
+            const res = await subirImagen({
                 data: JSON.stringify({
                     imagen: form.imagen.b64,
-                    nombre: form.imagen.nombre,
-                    usuario: form.usuario
+                    nombre: form.imagen.nombre
                 })
             })
+
+            const resFirebase = await publicarEnFibrebase({
+                data: {
+                    opcion: '2',
+                    data: {
+                        usuario: form.usuario,
+                        url: res.data.url
+                    }
+                }
+            })
+
+            dispatch(RESET_FORM())
 
         }
     }
@@ -140,7 +138,7 @@ const FormImagen = () => {
                             <input className="custom-file-input"
                                 type="file"
                                 name="imagen"
-                                onChange={handleOnImagenChange}                 
+                                onChange={handleOnImagenChange}
                             />
                         </div>
                     </div>

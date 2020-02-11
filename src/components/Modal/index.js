@@ -5,9 +5,20 @@ import { CLOSE_MODAL } from '../../reducers/DOM/actions'
 
 const ModalComponent = () => {
     const { modal } = useSelector(state => state.DOM)
+
     const dispatch = useDispatch()
 
     const handleOnClose = () => dispatch(CLOSE_MODAL());
+    /*
+    const handleOnClose = () => {
+        dispatch(CLOSE_MODAL())
+        dispatch(CLOSE_MODAL())
+    }
+
+    function handleOnClose() {
+        dispatch(CLOSE_MODAL());
+    }
+    */
 
     return (
         <Modal
